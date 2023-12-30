@@ -17,3 +17,11 @@
             - labels: metadata for this file which used for search system
                 - filename: base on filename information
                 - [Optional] metadata: netcdf metadata information
+
+## Todo
+- [ ] search system
+    - [ ] SQLite
+    - [ ] Auto add metadata
+- [ ] file duplicate
+- [ ] default rule for unknown type
+ 
