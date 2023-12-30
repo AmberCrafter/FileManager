@@ -1,0 +1,27 @@
+{
+    "root": "C:\\Users\\USER\\Desktop\\Codespace\\python\\filesystem\\output",
+
+    "rules": {
+        "unknown": {
+            "type": "unknown",
+            "folder": ["unknown"]
+        },
+        "general": {
+            "type": "general",
+            "format": ".*?(?P<year>\\d{4})_(?P<month>\\d{1,2})_(?P<day>\\d{1,2}).*.(txt|csv)",
+            "folder": ["gerneral", "year", "month", "day"],
+            "labels": {
+                "filename": ["year", "month", "day"]
+            }
+        },
+        "netcdf": {
+            "type": "netcdf",
+            "format": ".*?(?P<parameter>\\w+)_(?P<year>\\d{4})_(?P<month>\\d{1,2})_(?P<day>\\d{1,2}).*.(nc)",
+            "folder": ["netcdf", "year", "month"],
+            "labels": {
+                "filename": ["parameter", "year", "month", "day"],
+                "metadata": []
+            }
+        }
+    }
+}
