@@ -17,11 +17,12 @@
             - labels: metadata for this file which used for search system
                 - filename: base on filename information
                 - [Optional] metadata: netcdf metadata information
+            - plugin: helper function for handling operations
+            - cache_path: cache file path
 
 ## Todo
-- [ ] search system
-    - [ ] SQLite
-    - [ ] Auto add metadata
+- [x] search system
+    - [x] SQLite
+    - [x] Auto add metadata
 - [ ] file duplicate
 - [ ] default rule for unknown type
- 
