@@ -9,10 +9,12 @@
         "general": {
             "type": "general",
             "format": ".*?(?P<year>\\d{4})_(?P<month>\\d{1,2})_(?P<day>\\d{1,2}).*.(txt|csv)",
-            "folder": ["gerneral", "year", "month", "day"],
+            "folder": ["general", "year", "month", "day"],
             "labels": {
                 "filename": ["year", "month", "day"]
-            }
+            },
+            "plugin": "general",
+            "cache_path": "./general/cache.db"
         },
         "netcdf": {
             "type": "netcdf",
@@ -21,7 +23,9 @@
             "labels": {
                 "filename": ["parameter", "year", "month", "day"],
                 "metadata": []
-            }
+            },
+            "plugin": "",
+            "cache_path": ""
         }
     }
 }

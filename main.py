@@ -1,5 +1,30 @@
 import os, re, json
 from pathlib import Path
+import importlib
+import sys
+
+
+class ModuleManager:
+    def __init__(self):
+        self.modules = {}
+    
+    def is_exist(self, module: str) -> bool:
+        if module in sys.modules:
+            return True
+        return False
+
+    def active(self, module: str):
+        if self.is_exist(module):
+            print("Module `{module}` is already loaded.")
+            return
+        self.modules[module] = importlib.import_module(f".{module}", "plugins")
+
+    def call(self, module: str, func: str, *args, **argv):
+        try:
+            return self.modules[module].__getattribute__(func)(*args, **argv)
+        except Exception as err:
+            raise err
+
 
 class FileManager:
     def __init__(self, config):
@@ -25,21 +50,24 @@ class ConfigFinder:
         self.re_match = None
         self.rule = None
         self.file = None
+        self.key = None
 
     def clear(self):
         self.re_match = None
         self.rule = None
 
-    def find_match(self, filename: str) -> bool:
+    def find_match(self, filepath: str) -> bool:
         self.clear()
         for key in self.config["rules"].keys():
             rule = self.config["rules"][key]
+            rule["root"] = self.config["root"]
             if "format" not in rule:
                 continue
-            self.re_match = re.match(rule["format"], filename)
+            self.re_match = re.match(rule["format"], filepath)
             if self.re_match is not None:
+                self.key = key
                 self.rule = rule
-                self.file = Path(filename)
+                self.file = Path(filepath)
                 return True
         return False
 
@@ -62,18 +90,59 @@ class ConfigFinder:
         return Path(root, *folders, self.file.name)
 
 
+class FileSystem:
+    def __init__(self, config: str) -> None:
+        self.finder = ConfigFinder(config)
+        self.manager = FileManager(config)
+        self.mods = ModuleManager()
+        self.groups = {}
+
+    def add(self, filepath: str):
+        if self.finder.find_match(filepath) and \
+          "plugin" in self.finder.rule.keys():
+            src = self.finder.file
+            dst = self.finder.get_destination()
+
+            self.mods.active(self.finder.rule["plugin"])
+            key = self.finder.key
+            if key not in self.groups.keys():
+                self.groups[key] = {
+                    "db": self.mods.call(key, "Cache",
+                                         cfg=self.finder.rule)
+                }
+
+            self.groups[key]["db"].add_cache(dst, self.finder.rule)
+            self.manager.move(dst, src)
+        else:
+            # TODO
+            pass
+
+    def search(self, classname: str, meta: dict) -> list:
+        return self.groups[classname]["db"].search(meta)
+
+
 def main():
     pass
 
 
 if __name__ == "__main__":
-    finder = ConfigFinder("./config.json")
-    manager = FileManager("./config.json")
-    test = "./hello_1234_56_78_sadkld.nc"
-    with open(test, 'w') as fd:
-        fd.write("1234,123,12,1\n")
-        fd.write("1234,123,12,1\n")
+    fs = FileSystem("./config.json")
 
-    finder.find_match(test)
-    finder.dump_result()
-    manager.move(finder.get_destination(), finder.file)
+    files = [
+        "./hello_2022_01_30_sadkld.txt",
+        "./hello_2022_02_10_sadkld.txt",
+        "./hello_2022_03_30_sadkld.txt",
+        "./hello_2022_04_30_sadkld.txt",
+    ]
+
+    for f in files:
+        with open(f, 'w') as fd:
+            fd.write("1234,123,12,1\n")
+            fd.write("1234,123,12,1\n")
+
+        fs.add(f)
+        fs.finder.dump_result()
+
+    print(fs.search("general", dict(starttime="2022-01-01", endtime="2022-03-03")))
+    print(fs.search("general", dict(parameter=["datetime", "path"], starttime="2022-01-01", endtime="2022-03-03")))
+
