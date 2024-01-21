@@ -38,13 +38,13 @@ class Cache:
         for key in labels.keys():
             for ele in labels[key]:
                 columns.append(ele)
-        
+
         for ele in columns:
             if ele not in db_columns:
                 if ele in ["year", "month", "day"]:
                     # self.index.add_column(tbname, ele, "integer")
                     print(f"Skip: {ele}")
-        
+
     def search(self, meta: object) -> list:
         '''search specified file by @meta data'''
         tbname = self.index.get_default_tablename()
@@ -79,7 +79,7 @@ class Cache:
             if tags is not None:
                 for tag in tags:
                     or_conditions.append(f'tags LIKE "%{tag}%"')
-        
+
         # combine all conditions
         tmp = ""
         if len(or_conditions) > 0:
@@ -98,7 +98,7 @@ class Cache:
         file = file if isinstance(file, Path) else Path(file)
         finder = re.match(cfg["format"], file.name)
 
-        # We known that year, month, and day in the file 
+        # We known that year, month, and day in the file
         groups = finder.groupdict().keys()
         current_time = datetime.datetime.now()
         year = int(finder.group("year")) if "year" in groups\
