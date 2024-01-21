@@ -1,66 +1,24 @@
-import datetime
-from enum import Enum
+'''
+Error types in File Database
 
-TIMEFORMAT = "%Y-%m-%d %H:%M:%S"
-
-
-# Base on system time zone
-def _get_current_time():
-    return datetime.datetime.now()
+Author: Weiru Chen <flamingm321@gmail.com>
+Date: 2024-01-21
+'''
 
 
 class GeneralException(Exception):
+    '''General exception class'''
     def __init__(self, message: str):
         super().__init__(message)
 
 
 class FileExistInDataBase(Exception):
+    '''File exist exception'''
     def __init__(self, message: str):
         super().__init__(message)
 
 
 class UnknownFileType(Exception):
+    '''Unknown file type exception'''
     def __init__(self, message: str):
         super().__init__(message)
-
-
-class LogLevel(Enum):
-    INFO = 1
-    WARN = 2
-    DEBUG = 3
-    ERROR = 4
-
-    def to_str(self):
-        return self.name
-
-
-class SystemLog:
-    def __init__(self, title: str, show: bool = False) -> None:
-        self.title = title
-        self.show = show
-
-    def _print(self, level: LogLevel, msg):
-        if not self.show:
-            return
-        time = _get_current_time().strftime(TIMEFORMAT)
-        print(f"{time} - [{level.name}] [{self.title}] {str(msg)}")
-
-    def info(self, msg: str):
-        self._print(LogLevel.INFO, msg)
-
-    def warn(self, msg: str):
-        self._print(LogLevel.WARN, msg)
-
-    def debug(self, msg: str):
-        self._print(LogLevel.DEBUG, msg)
-
-    def error(self, msg: str):
-        self._print(LogLevel.ERROR, msg)
-
-
-
-
-
-
-
-

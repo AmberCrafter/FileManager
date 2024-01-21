@@ -1,7 +1,7 @@
 '''
 File Database source code
 
-Auther: Weiruchen <flamingm321@gmail.com>
+Author: Weiru Chen <flamingm321@gmail.com>
 Date: 2024-01-21
 '''
 
@@ -11,7 +11,8 @@ import json
 from pathlib import Path
 import importlib
 import sys
-from lib.error import FileExistInDataBase, UnknownFileType, SystemLog
+from lib.error import FileExistInDataBase, UnknownFileType
+from lib.log import SystemLog
 
 
 class ModuleManager:

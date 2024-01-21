@@ -1,12 +1,20 @@
-from lib import libindex
+'''
+The general version of File Database plugin
+
+Author: Weiru Chen <flamingm321@gmail.com>
+Date: 2024-01-21
+'''
+
 import os
 import uuid
-from pathlib import Path
 import re
 import datetime
+from pathlib import Path
+from lib import libindex
 
 
 class Cache:
+    '''Plugin basic class'''
     def __init__(self, cfg: dict):
         self.config = cfg
         path = cfg["cache_path"]
@@ -38,8 +46,10 @@ class Cache:
                     print(f"Skip: {ele}")
         
     def search(self, meta: object) -> list:
+        '''search specified file by @meta data'''
         tbname = self.index.get_default_tablename()
-        if "parameter" not in meta or meta["parameter"] is None or meta["parameter"] == []:
+        if "parameter" not in meta or meta["parameter"] is None or\
+           meta["parameter"] == []:
             parameter = "*"
         else:
             parameter = meta["parameter"]
@@ -84,6 +94,7 @@ class Cache:
         return self.index.fa()
 
     def add_cache(self, file: str | Path, cfg: dict, tags: None | list = None):
+        '''Add file meta data'''
         file = file if isinstance(file, Path) else Path(file)
         finder = re.match(cfg["format"], file.name)
 
@@ -109,5 +120,3 @@ class Cache:
         else:
             self.index.query(f"""INSERT INTO {tbname} (datetime, path) VALUES
                          ({dt}, \"{file.absolute()}\");""")
-
-
