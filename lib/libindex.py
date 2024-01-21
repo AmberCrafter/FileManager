@@ -28,18 +28,18 @@ class Index:
             );"""
         query = re.sub(r"\n?\s+", " ", raw_query)
         self.exe(query)
-    
+
     def query(self, cmd: str):
         '''SQL query'''
         query = re.sub(r"\n?\s+", " ", cmd)
         self.exe(query)
         self.db.commit()
 
-    def add_column(self, tablename: str, column: str, type: str, 
+    def add_column(self, tablename: str, column: str, dtype: str,
                    opts: str = ""):
         '''Add new column into sql'''
         query = f"""
-            ALTER TABLE {tablename} ADD {column} {type} {opts};
+            ALTER TABLE {tablename} ADD {column} {dtype} {opts};
             """
         self.exe(query)
 
