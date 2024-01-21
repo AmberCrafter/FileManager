@@ -10,7 +10,7 @@
  - formation:
     - root: File system root folder
     - rules: management rules
-        - classification: 
+        - rulename: 
             - type: file class
             - format: reguler expersion for filting files, which can provide parameter to folder
             - folder: folder structure
@@ -24,5 +24,13 @@
 - [x] search system
     - [x] SQLite
     - [x] Auto add metadata
-- [ ] file duplicate
-- [ ] default rule for unknown type
+- [x] file duplicate
+    - [ ] ~~~raise error~~~
+    - [x] log warning
+    - [x] setup Filesystem config
+- [x] default rule for unknown type
+    - [x] skip it and show error message
+- [x] file tages
+- [x] load config & cache & module
+- [ ] Add configuration manager
+    - [ ] ConfigFinder inherit from ConfigManger

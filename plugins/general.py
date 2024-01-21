@@ -46,18 +46,44 @@ class Cache:
             if isinstance(parameter, list):
                 parameter = ','.join(parameter)
 
+        and_conditions = []
+        or_conditions = []
         conditions = ""
         if "starttime" in meta and "endtime" in meta:
             st = meta["starttime"]
             et = meta["endtime"]
-            conditions = f'where datetime between "{st}" and "{et}"'
+            and_conditions.append(f'datetime between "{st}" and "{et}"')
+        elif "starttime" in meta:
+            st = meta["starttime"]
+            and_conditions.append(f'datetime >= "{st}"')
+        elif "endtime" in meta:
+            et = meta["endtime"]
+            and_conditions.append(f'datetime <= "{et}"')
+
+        if "tags" in meta:
+            tags = None
+            if isinstance(meta["tags"], str):
+                tags = meta["tags"].split(',')
+            if isinstance(meta["tags"], list):
+                tags = meta["tags"]
+            if tags is not None:
+                for tag in tags:
+                    or_conditions.append(f'tags LIKE "%{tag}%"')
         
+        # combine all conditions
+        tmp = ""
+        if len(or_conditions) > 0:
+            tmp = ' or '.join(or_conditions)
+            and_conditions.append(tmp)
+        if len(and_conditions) > 0:
+            tmp = ' and '.join(and_conditions)
+            conditions = f"where {tmp}"
         query = f"SELECT {parameter} from {tbname} {conditions};"
 
         self.index.query(query)
         return self.index.fa()
 
-    def add_cache(self, file: str | Path, cfg: dict):
+    def add_cache(self, file: str | Path, cfg: dict, tags: None | list = None):
         file = file if isinstance(file, Path) else Path(file)
         finder = re.match(cfg["format"], file.name)
 
@@ -76,7 +102,12 @@ class Cache:
         tbname = self.index.get_default_tablename()
         dt = datetime.datetime(year, month, day, hour, minute, second)\
             .strftime('"%Y-%m-%d %H:%M:%S"')
-        self.index.query(f"""INSERT INTO {tbname} (datetime, path) VALUES
+        if tags is not None and len(tags) > 0:
+            tag = ','.join(tags)
+            self.index.query(f"""INSERT INTO {tbname} (datetime, path, tags)
+                         VALUES ({dt}, \"{file.absolute()}\", \"{tag}\");""")
+        else:
+            self.index.query(f"""INSERT INTO {tbname} (datetime, path) VALUES
                          ({dt}, \"{file.absolute()}\");""")
 
 

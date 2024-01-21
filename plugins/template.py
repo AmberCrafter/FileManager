@@ -12,7 +12,7 @@ class Cache(general.Cache):
         pass
 
     # Overwrite add cache
-    def add_cache(self, filename: str):
+    def add_cache(self, filename: str, tags: None | list = None):
         pass
 
 

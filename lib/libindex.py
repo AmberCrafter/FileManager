@@ -15,7 +15,8 @@ class Index:
             CREATE TABLE IF NOT EXISTS {tablename} (
                 id integer primary key autoincrement,
                 datetime text,
-                path text NOT NULL
+                path text NOT NULL,
+                tags text
             );"""
         query = re.sub(r"\n?\s+", " ", raw_query)
         self.exe(query)
