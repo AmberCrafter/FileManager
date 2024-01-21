@@ -119,6 +119,9 @@ class ConfigFinder:
 
     def dump_result(self):
         '''Dump debug info'''
+        if self.file is None or self.re_match is None:
+            return
+
         print(f"file: {self.file}")
         print(f"match result: {self.re_match}")
         # print(self.rule)
@@ -150,12 +153,18 @@ class FileDB:
 
     def _load_module_raw(self, rulename: str):
         '''Helper function: loading specified module/plugin with rulename'''
-        if rulename not in self.groups.keys():
-            self.mods.active(self.finder.rule["plugin"])
-            self.groups[rulename] = {
-                "db": self.mods.call(rulename, "Cache",
-                                     cfg=self.finder.rule)
-            }
+        if rulename is None:
+            return
+
+        for key in self.groups.keys():
+            if rulename == key:
+                return
+
+        self.mods.active(self.finder.rule["plugin"])
+        self.groups[rulename] = {
+            "db": self.mods.call(rulename, "Cache",
+                                 cfg=self.finder.rule)
+        }
 
     def load_module(self, rulename: str) -> bool:
         '''Loading specified module/plugin with rulename'''
@@ -178,7 +187,9 @@ class FileDB:
             if os.path.exists(dst):
                 msg = FileExistInDataBase(f"{src} is exist in {dst}")
                 self.log.error(msg)
-                raise msg
+                self.finder.clear()
+                # raise msg
+                return
 
             rulename = self.finder.rulename
             self._load_module_raw(rulename)
