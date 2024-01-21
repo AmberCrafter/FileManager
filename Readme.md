@@ -1,5 +1,5 @@
 # File Manager
- - version: 0.1.0
+ - version: 0.2.0
  - author: Weiru Chen
  - email: flamingm321@gmail.com
  - description:
