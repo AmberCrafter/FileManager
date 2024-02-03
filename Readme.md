@@ -33,5 +33,9 @@
 - [x] file tages
 - [x] load config & cache & module
 - [ ] Add configuration manager
-    - [ ] ConfigFinder inherit from ConfigManger
+    - [x] ConfigFinder inherit from ConfigManger
+    - [ ] Support different format
+        - [ ] ini
+        - [x] json
+        - [ ] toml
 - [ ] log file

@@ -6,8 +6,88 @@ Date: 2024-01-21
 '''
 
 import re
+import os
 import json
 from pathlib import Path
+from enum import Enum
+import toml
+
+
+class ConfigType(Enum):
+    '''Config file type'''
+    UNKNOWN = 0
+    TEXT = 1
+    INI = 2
+    JSON = 3
+    TOML = 4
+
+    @staticmethod
+    def get(suffix: str):
+        """Retrieve config file enum type"""
+        suffix = suffix.lower()
+        if suffix == 'txt':
+            return ConfigType.TEXT
+        if suffix == 'ini':
+            return ConfigType.INI
+        if suffix == 'json':
+            return ConfigType.JSON
+        if suffix == 'toml':
+            return ConfigType.TOML
+        return ConfigType.UNKNOWN
+
+
+class ConfigManager:
+    '''
+    Config Manager use to manager config file
+
+    Note. current only support Json
+    '''
+    def __init__(self, config):
+        self.path = Path(config)
+        self.file = self.path.name
+        self.type = ConfigType.get(self.path.suffix[1:])
+
+        if self.type == ConfigType.JSON:
+            with open(config, 'r', encoding='utf-8') as f:
+                self.config = json.load(f)
+        elif self.type == ConfigType.TOML:
+            with open(config, 'r', encoding='utf-8') as f:
+                self.config = toml.load(f)
+        else:
+            raise f"[ConfigManager] not support config format: {self.type}\
+                  (file: {self.file})"
+
+    def save(self):
+        '''Save config to file'''
+        if self.type == ConfigType.JSON:
+            with open(self.path, 'w', encoding='utf-8') as f:
+                json.dump(self.config, f)
+        elif self.type == ConfigType.TOML:
+            with open(self.path, 'w', encoding='utf-8') as f:
+                toml.dump(self.config, f)
+        else:
+            raise f"[ConfigManager] not support config format: {self.type}\
+                  (file: {self.file})"
+
+    def delete(self):
+        '''Remove config file'''
+        os.remove(self.path)
+
+    def reload(self):
+        '''Reload config'''
+        if self.type == ConfigType.JSON:
+            with open(self.path, 'r', encoding='utf-8') as f:
+                self.config = json.load(f)
+        elif self.type == ConfigType.TOML:
+            with open(self.path, 'r', encoding='utf-8') as f:
+                self.config = toml.load(f)
+        else:
+            raise f"[ConfigManager] not support config format: {self.type}\
+                  (file: {self.file})"
+
+    def get(self) -> dict:
+        '''Get config from RAM'''
+        return self.config
 
 
 class ConfigFinder:
@@ -15,38 +95,38 @@ class ConfigFinder:
     Config Finder use to find specifed rule in config
     '''
     def __init__(self, config):
-        with open(config, 'r', encoding='utf-8') as f:
-            self.config = json.load(f)
+        self.config = ConfigManager(config)
         self.re_match = None
         self.rule = None
         self.file = None
         self.rulename = None
 
     def clear(self):
-        '''Clear all config in RAM'''
+        '''Clear all config in RAM and reload from file'''
         self.re_match = None
         self.rule = None
         self.file = None
         self.rulename = None
+        self.config.reload()
 
     def set_rule(self, rule):
         '''Helper function: setup rule with init root information'''
         self.rule = rule
-        self.rule['root'] = self.config['root']
+        self.rule['root'] = self.config.config['root']
 
     def find_rule(self, rulename: str) -> bool:
         '''Find specified rule in config'''
-        if rulename not in self.config["rules"].keys():
+        if rulename not in self.config.get()["rules"].keys():
             return False
         self.rulename = rulename
-        self.set_rule(self.config["rules"][rulename])
+        self.set_rule(self.config.get()["rules"][rulename])
         return True
 
     def find_match(self, filepath: str) -> bool:
         '''Find rule which the filter rule match filepath'''
         self.clear()
-        for rulename in self.config["rules"].keys():
-            rule = self.config["rules"][rulename]
+        for rulename in self.config.get()["rules"].keys():
+            rule = self.config.get()["rules"][rulename]
             if "format" not in rule:
                 continue
             self.re_match = re.match(rule["format"], filepath)
@@ -74,7 +154,7 @@ class ConfigFinder:
         '''Helper function: Generate destination path which is matched'''
         if self.re_match is None or self.rule["folder"] is None:
             return None
-        root = self.config["root"]
+        root = self.config.get()["root"]
         folders = [self.rule["folder"][0]]
         folders.extend(
             [self.re_match.group(key) for key in self.rule["folder"][1:]]
