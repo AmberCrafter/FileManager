@@ -89,6 +89,16 @@ class ConfigManager:
         '''Get config from RAM'''
         return self.config
 
+    def set(self, keys: str | list, value):
+        '''Set config'''
+        if isinstance(keys, str):
+            self.config[keys] = value
+        elif isinstance(keys, list):
+            cfg = self.config
+            for key in keys[:-1]:
+                cfg = cfg[key]
+            cfg[keys[-1]] = value
+
 
 class ConfigFinder:
     '''
@@ -160,3 +170,9 @@ class ConfigFinder:
             [self.re_match.group(key) for key in self.rule["folder"][1:]]
         )
         return Path(root, *folders, self.file.name)
+
+
+if __name__ == "__main__":
+    cfg = ConfigManager("./config.json")
+    cfg.set(['rules', 'unknown', 'type'], '123')
+    print(cfg.get())

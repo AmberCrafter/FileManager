@@ -37,5 +37,6 @@
     - [ ] Support different format
         - [ ] ini
         - [x] json
-        - [ ] toml
+        - [x] toml
 - [ ] log file
+- [ ] requirements.txt

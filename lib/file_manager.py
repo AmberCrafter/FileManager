@@ -5,8 +5,8 @@ Author: Weiru Chen <flamingm321@gmail.com>
 Date: 2024-01-21
 '''
 
-import json
 from pathlib import Path
+from lib.config_manager import ConfigManager
 
 
 class FileManager:
@@ -14,14 +14,12 @@ class FileManager:
     File Manager use to manager file-base database
     '''
     def __init__(self, config):
-        with open(config, 'r', encoding='utf-8') as f:
-            self.config = json.load(f)
-            if self.config["root"] is not None:
-                return
+        self.config = ConfigManager(config)
+        if self.config.get()["root"] is not None:
+            return
         self.root = Path.absolute("./output/")
-        self.config["root"] = str(self.root)
-        with open(config, 'w', encoding='utf-8') as f:
-            json.dump(self.config, f)
+        self.config.set("root", str(self.root))
+        self.config.save()
 
     def check_or_create_folder(self, path: str | Path):
         '''Create all directories in specified path which may not exist'''
